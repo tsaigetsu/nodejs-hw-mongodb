@@ -34,6 +34,4 @@ const studentsSchema = new Schema(
   },
 );
 
-const StudentsCollection = model('students', studentsSchema);
-
-export default StudentsCollection;
+export const StudentsCollection = model('students', studentsSchema);
