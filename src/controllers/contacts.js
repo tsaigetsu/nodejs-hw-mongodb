@@ -1,7 +1,13 @@
 // src/controllers/contacts.js
 
 import createError from 'http-errors';
-import { getAllContacts, getContactById as getContactByIdService, createNewContact } from '../services/contacts.js';
+import { 
+  getAllContacts, 
+  getContactById as getContactByIdService, 
+  createNewContact, 
+  updateContactById,
+  deleteContactById
+} from '../services/contacts.js';
 
 export const getContacts = async (req, res, next) => {
   try {
