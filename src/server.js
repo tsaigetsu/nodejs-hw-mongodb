@@ -25,7 +25,6 @@ export const setupServer = () => {
   );
 
   app.use('/contacts', contactsRouter);
-  app.use('/students', studentsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
