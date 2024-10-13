@@ -1,7 +1,8 @@
 //src/middlewares/authenticate.js
 
 import createError from 'http-errors';
-import { verify } from 'jsonwebtoken';
+import pkg from 'jsonwebtoken';
+const { verify } = pkg;
 import { env } from '../utils/env.js';
 
 export const authenticate = (req, res, next) => {
