@@ -2,12 +2,12 @@
 
 import { Session } from '../db/models/session.js';
 import { sign } from 'jsonwebtoken';
-import { config } from '../utils/env.js';
+import { env } from '../utils/env.js';
 import { User } from '../db/models/user.js';
 
 export const createSessionService = async (userId) => {
-  const accessToken = sign({ id: userId }, config.JWT_SECRET, { expiresIn: '15m' });
-  const refreshToken = sign({ id: userId }, config.JWT_SECRET, { expiresIn: '7d' });
+  const accessToken = sign({ id: userId }, env.JWT_SECRET, { expiresIn: '15m' });
+  const refreshToken = sign({ id: userId }, env.JWT_SECRET, { expiresIn: '7d' });
 
   const session = new Session({
     userId,
@@ -23,15 +23,15 @@ export const createSessionService = async (userId) => {
 
 export const refreshSessionService = async (refreshToken) => {
   try {
-    const decoded = verify(refreshToken, config.JWT_SECRET);
+    const decoded = verify(refreshToken, env.JWT_SECRET);
     const session = await Session.findOne({ refreshToken });
 
     if (!session || session.userId.toString() !== decoded.id) {
       throw new Error('Invalid refresh token');
     }
 
-    const newAccessToken = sign({ id: decoded.id }, config.JWT_SECRET, { expiresIn: '15m' });
-    const newRefreshToken = sign({ id: decoded.id }, config.JWT_SECRET, { expiresIn: '7d' });
+    const newAccessToken = sign({ id: decoded.id }, env.JWT_SECRET, { expiresIn: '15m' });
+    const newRefreshToken = sign({ id: decoded.id }, env.JWT_SECRET, { expiresIn: '7d' });
 
     session.accessToken = newAccessToken;
     session.refreshToken = newRefreshToken;
