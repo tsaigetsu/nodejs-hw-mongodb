@@ -7,6 +7,7 @@ import authRouter from './routers/auth.js';
 import contactsRouter from './routers/contacts.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import { env } from './utils/env.js';
 
 const app = express();
 
@@ -20,10 +21,15 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const startServer = async () => {
-  await initMongoConnections();
-  app.listen(config.PORT, () => {
-    console.log(`Server running on port ${config.PORT}`);
-  });
+  try {
+    await initMongoConnections();
+    const PORT = Number(env('PORT', '3000'));
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Error starting the server:', error);
+  }
 };
 
 startServer();
