@@ -1,7 +1,8 @@
 // src/middlewares/notFoundHandler.js
 
-import createError from 'http-errors';
-
 export const notFoundHandler = (req, res, next) => {
-  next(createError(404, 'Resource not found'));
+  res.status(404).json({
+    status: 404,
+    message: 'Not Found',
+  });
 };
