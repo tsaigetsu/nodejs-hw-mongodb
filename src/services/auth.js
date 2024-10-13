@@ -1,7 +1,8 @@
 //src/services.auth.js
 
 import { Session } from '../db/models/session.js';
-import { sign } from 'jsonwebtoken';
+import pkg from 'jsonwebtoken';
+const { sign } = pkg;
 import { env } from '../utils/env.js';
 import { User } from '../db/models/user.js';
 
