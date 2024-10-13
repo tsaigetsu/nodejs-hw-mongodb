@@ -1,5 +1,3 @@
-// src/controllers/contacts.js
-
 import createError from 'http-errors';
 import { 
   getAllContacts, 
@@ -11,7 +9,8 @@ import {
 
 export const getContacts = async (req, res, next) => {
   try {
-    const contacts = await getAllContacts();
+    const contacts = await getAllContacts(req.query);
+
     res.status(200).json({
       status: 200,
       message: 'Successfully found contacts!',
