@@ -23,7 +23,7 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     await initMongoConnections();
-    const PORT = Number(env('PORT', '3000'));
+    const PORT = Number(env('PORT', 3000));
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

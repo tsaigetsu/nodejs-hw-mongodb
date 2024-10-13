@@ -1,13 +1,15 @@
 // src/db/initMongoConnections.js
 
 import mongoose from 'mongoose';
-
-import mongoose from 'mongoose';
-import { config } from '../utils/env.js';
+import { env } from '../utils/env.js';
 
 export const initMongoConnections = async () => {
   try {
-    await mongoose.connect(config.DB_URL, {
+    const DB_URL = env('DB_URL');
+    if (!DB_URL) {
+      throw new Error('DB_URL is not defined in environment variables');
+    }
+    await mongoose.connect(DB_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
