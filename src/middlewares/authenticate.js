@@ -2,7 +2,7 @@
 
 import createError from 'http-errors';
 import { verify } from 'jsonwebtoken';
-import { config } from '../utils/env.js';
+import { env } from '../utils/env.js';
 
 export const authenticate = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
@@ -11,7 +11,7 @@ export const authenticate = (req, res, next) => {
     return next(createError(401, 'No token provided'));
   }
 
-  verify(token, config.JWT_SECRET, (err, decoded) => {
+  verify(token, env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return next(createError(403, 'Failed to authenticate token'));
     }
