@@ -1,15 +1,22 @@
-// src/utils/env.js
+//src/utils/env.js
 
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-export function env(name, defaultValue) {
-  const value = process.env[name];
+export const env = (key, defaultValue = undefined) => {
+  return process.env[key] || defaultValue;
+};
 
-  if (value) return value;
+export const getMongoDbUrl = () => {
+  const user = env('MONGODB_USER');
+  const password = env('MONGODB_PASSWORD');
+  const clusterUrl = env('MONGODB_URL');
+  const dbName = env('MONGODB_DB');
 
-  if (defaultValue) return defaultValue;
+  if (!user || !password || !clusterUrl || !dbName) {
+    throw new Error('MongoDB connection details are missing in environment variables');
+  }
 
-  throw new Error(`Missing: process.env['${name}'].`);
-}
+  return `mongodb+srv://${user}:${password}@${clusterUrl}/${dbName}?retryWrites=true&w=majority`;
+};
