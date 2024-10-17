@@ -1,4 +1,5 @@
 // src/index.js
+// src/index.js
 
 import express from 'express';
 import cookieParser from 'cookie-parser';
@@ -31,5 +32,5 @@ const startServer = async () => {
     console.error('Error starting the server:', error);
   }
 };
-
 startServer();
+
