@@ -62,7 +62,5 @@ export const login = async (req, res) => {
 export const createSessionService = async (userId) => {
   const accessToken = jwt.sign({ userId }, env('JWT_SECRET'), { expiresIn: '1h' });
   const refreshToken = jwt.sign({ userId }, env('JWT_SECRET'), { expiresIn: '30d' });
-
-
   return { accessToken, refreshToken };
 };

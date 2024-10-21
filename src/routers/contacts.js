@@ -9,11 +9,11 @@ import {
   deleteContact 
 } from '../controllers/contacts.js';
 import { isValidId } from '../middlewares/isValidId.js';
-import { authenticate } from '../middlewares/authenticate.js';
+// import { authenticate } from '../middlewares/authenticate.js';
 
 const router = express.Router();
 
-router.use(authenticate);
+// router.use(authenticate);
 
 router.get('/', getContacts);
 router.get('/:contactId', isValidId, getContactById);
