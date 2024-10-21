@@ -1,6 +1,4 @@
 // src/index.js
-// src/index.js
-
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { initMongoConnections } from './db/initMongoConnections.js';
@@ -32,5 +30,5 @@ const startServer = async () => {
     console.error('Error starting the server:', error);
   }
 };
-startServer();
 
+startServer();

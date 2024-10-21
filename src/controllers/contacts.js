@@ -49,12 +49,15 @@ export const createContact = async (req, res, next) => {
       return next(createError(400, 'Missing required fields'));
     }
 
+    const photoUrl = req.file ? req.file.path : null;
+
     const newContact = await createNewContact({
       name,
       phoneNumber,
       email,
       isFavourite,
       contactType,
+      photo: photoUrl,
     });
 
     res.status(201).json({
@@ -67,10 +70,15 @@ export const createContact = async (req, res, next) => {
   }
 };
 
+
 export const updateContact = async (req, res, next) => {
   try {
     const { contactId } = req.params;
     const updateData = req.body;
+
+    if (req.file) {
+      updateData.photo = req.file.path;
+    }
 
     const updatedContact = await updateContactById(contactId, updateData);
 
@@ -87,6 +95,7 @@ export const updateContact = async (req, res, next) => {
     next(createError(500, 'Error updating contact'));
   }
 };
+
 
 export const deleteContact = async (req, res, next) => {
   try {
