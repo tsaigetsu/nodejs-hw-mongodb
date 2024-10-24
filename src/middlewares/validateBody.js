@@ -1,14 +1,16 @@
-// src/middlewares/validateBody.js
+//src/middlewares/validateBody.js
 
-export const validateBody = (schema) => {
-  return (req, res, next) => {
-    const { error } = schema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        status: 400,
-        message: error.details[0].message,
-      });
-    }
+
+export const validateBody = (schema) => async (req, res, next) => {
+  const { body } = req;
+  try {
+    await schema.validateAsync(body, {
+      convert: false,
+      abortEarly: false,
+    });
+
     next();
-  };
+  } catch (err) {
+    next(err);
+  }
 };
