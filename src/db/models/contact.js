@@ -1,4 +1,4 @@
-// src/db/models/contact.js
+//src/db/models/contact.js
 
 import { model, Schema } from 'mongoose';
 
@@ -33,4 +33,4 @@ const contactsSchema = new Schema(
   },
 );
 
-export const ContactsCollection = model('contacts', contactsSchema);
+export const Contacts = model('contacts', contactsSchema);
