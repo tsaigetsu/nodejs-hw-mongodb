@@ -1,5 +1,3 @@
-//src/db/models/contact.js
-
 import { model, Schema } from 'mongoose';
 
 const contactsSchema = new Schema(
@@ -16,7 +14,7 @@ const contactsSchema = new Schema(
       type: String,
       required: false,
     },
-    isFavourite: {
+    isFavorite: {
       type: Boolean,
       default: false,
     },
@@ -26,6 +24,11 @@ const contactsSchema = new Schema(
       required: true,
       default: 'personal',
     },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'users',
+    },
+    photo: { type: String },
   },
   {
     timestamps: true,
@@ -33,4 +36,4 @@ const contactsSchema = new Schema(
   },
 );
 
-export const Contacts = model('contacts', contactsSchema);
+export const ContactsCollection = model('contacts', contactsSchema);
