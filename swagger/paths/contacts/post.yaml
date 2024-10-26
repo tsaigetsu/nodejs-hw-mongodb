@@ -1,0 +1,20 @@
+tags:
+  - Contacts
+summary: Створення нового контакту
+operationId: createContact
+description: Цей ендпоінт створює новий контакт.
+security:
+  - bearerAuth: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/NewContact'
+responses:
+  '201':
+    description: Контакт успішно створений
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Contact'
