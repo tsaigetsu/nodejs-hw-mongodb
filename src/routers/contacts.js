@@ -1,23 +1,39 @@
-import express from 'express';
-import { 
-  getContacts, 
-  getContactById, 
-  createContact, 
-  updateContact, 
-  deleteContact 
+import { Router } from 'express';
+import {
+  getContactsController,
+  getContactByIdController,
+  createContactController,
+  patchContactController,
+  deleteContactController,
 } from '../controllers/contacts.js';
+import { ctrlWrapper } from '../utils/ctrlWrapper.js';
+import {
+  createContactSchema,
+  updateContactSchema,
+} from '../validation/contacts.js';
+import { validateBody } from '../middlewares/validateBody.js';
 import { isValidId } from '../middlewares/isValidId.js';
 import { authenticate } from '../middlewares/authenticate.js';
-import upload from '../middlewares/upload.js';
+import { upload } from '../middlewares/multer.js';
 
-const router = express.Router();
-
+const router = Router();
 router.use(authenticate);
 
-router.get('/', getContacts);
-router.get('/:contactId', isValidId, getContactById);
-router.post('/', upload.single('photo'), createContact);
-router.put('/:contactId', isValidId, upload.single('photo'), updateContact);
-router.delete('/:contactId', isValidId, deleteContact);
+router.get('/', ctrlWrapper(getContactsController));
+router.get('/:contactId', isValidId, ctrlWrapper(getContactByIdController));
+router.post(
+  '/',
+  upload.single('photo'),
+  validateBody(createContactSchema),
+  ctrlWrapper(createContactController),
+);
+router.patch(
+  '/:contactId',
+  isValidId,
+  upload.single('photo'),
+  validateBody(updateContactSchema),
+  ctrlWrapper(patchContactController),
+);
+router.delete('/:contactId', isValidId, ctrlWrapper(deleteContactController));
 
 export default router;

@@ -1,108 +1,128 @@
-// src/controllers/auth.js
+import { registerUser } from '../services/auth.js';
+import { loginUser } from '../services/auth.js';
+import { ONE_DAY } from '../constants/index.js';
+import { logoutUser } from '../services/auth.js';
+import { refreshUserSession } from '../services/auth.js';
+import { requestResetToken } from '../services/auth.js';
+import { resetPassword } from '../services/auth.js';
+import { generateAuthUrl } from '../utils/googleOAuth2.js';
+import { loginOrSignupWithGoogle } from '../services/auth.js';
 
-import createError from 'http-errors';
-import bcrypt from 'bcryptjs';
-import { User } from '../db/models/user.js';
-import { createSessionService, refreshSessionService, logoutService } from '../services/auth.js';
+export const registerUserController = async (req, res) => {
+  const user = await registerUser(req.body);
 
-export const register = async (req, res, next) => {
-  try {
-    const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-      return next(createError(400, 'Missing required fields'));
-    }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return next(createError(409, 'Email in use'));
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
-    await newUser.save();
-
-    const { password: _, ...userWithoutPassword } = newUser.toObject();
-
-    res.status(201).json({
-      status: 201,
-      message: 'Successfully registered a user!',
-      data: userWithoutPassword,
-    });
-  } catch (error) {
-    console.error(error);
-    next(createError(500, 'Error registering user'));
-  }
+  res.status(200).json({
+    status: 200,
+    message: 'Successfully registered a user!',
+    data: { user },
+  });
 };
 
-export const login = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
+export const loginUserController = async (req, res) => {
+  const session = await loginUser(req.body);
 
-    if (!email || !password) {
-      return next(createError(400, 'Missing required fields'));
-    }
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + ONE_DAY),
+  });
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(Date.now() + ONE_DAY),
+  });
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return next(createError(401, 'Invalid email or password'));
-    }
-
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if (!isPasswordCorrect) {
-      return next(createError(401, 'Invalid email or password'));
-    }
-
-    const session = await createSessionService(user._id);
-
-    res.cookie('refreshToken', session.refreshToken, { httpOnly: true });
-
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully logged in a user!',
-      data: { accessToken: session.accessToken },
-    });
-  } catch (error) {
-    console.error(error);
-    next(createError(500, 'Error logging in user'));
-  }
+  res.json({
+    status: 200,
+    message: 'Successfully logged in an user!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
 };
 
-export const refreshSession = async (req, res, next) => {
-  try {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (!refreshToken) {
-      return next(createError(401, 'No refresh token provided'));
-    }
-
-    const session = await refreshSessionService(refreshToken);
-    
-    res.status(200).json({
-      status: 200,
-      message: 'Successfully refreshed a session!',
-      data: { accessToken: session.accessToken },
-    });
-  } catch (error) {
-    console.error(error);
-    next(createError(500, 'Error refreshing session'));
+export const logoutUserController = async (req, res) => {
+  if (req.cookies.sessionId) {
+    await logoutUser(req.cookies.sessionId, req.cookies.refreshToken);
   }
+
+  res.clearCookie('sessionId');
+  res.clearCookie('refreshToken');
+
+  res.status(204).send();
 };
 
-// Выход пользователя
-export const logout = async (req, res, next) => {
-  try {
-    const refreshToken = req.cookies.refreshToken;
+const setupSession = (res, session) => {
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + ONE_DAY),
+  });
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(Date.now() + ONE_DAY),
+  });
+};
 
-    if (!refreshToken) {
-      return next(createError(401, 'No refresh token provided'));
-    }
-
-    await logoutService(refreshToken);
-    
-    res.status(204).send();
-  } catch (error) {
-    console.error(error);
-    next(createError(500, 'Error logging out'));
+export const refreshUserSessionController = async (req, res) => {
+  const { sessionId, refreshToken } = req.cookies;
+  if (!sessionId || !refreshToken) {
+    return res.status(400).json({
+      status: 400,
+      message: 'Session not found',
+    });
   }
+  const session = await refreshUserSession({
+    sessionId: req.cookies.sessionId,
+    refreshToken: req.cookies.refreshToken,
+  });
+
+  setupSession(res, session);
+
+  res.json({
+    status: 200,
+    message: 'Successfully refreshed a session!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
+};
+
+export const requestResetEmailController = async (req, res) => {
+  await requestResetToken(req.body.email);
+  res.json({
+    message: 'Reset password email was successfully sent',
+    status: 200,
+    data: {},
+  });
+};
+
+export const resetPasswordController = async (req, res) => {
+  await resetPassword(req.body);
+  res.json({
+    message: 'Password was successfully reset',
+    status: 200,
+    data: {},
+  });
+};
+
+export const getGoogleAuthUrlController = async (req, res) => {
+  const url = generateAuthUrl();
+  res.json({
+    status: 200,
+    message: 'Successfully get Google OAuth url!',
+    data: {
+      url,
+    },
+  });
+};
+
+export const loginWithGoogleController = async (req, res) => {
+  const session = await loginOrSignupWithGoogle(req.body.code);
+  setupSession(res, session);
+
+  res.json({
+    status: 200,
+    message: 'Successfully logged in via Google OAuth!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
 };
