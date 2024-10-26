@@ -1,0 +1,27 @@
+tags:
+  - Contacts
+summary: Отримання списку контактів
+operationId: getContacts
+description: Цей ендпоінт повертає список всіх контактів.
+security:
+  - bearerAuth: []
+parameters:
+  - in: query
+    name: limit
+    schema:
+      type: integer
+    description: Обмеження кількості контактів на сторінці
+  - in: query
+    name: offset
+    schema:
+      type: integer
+    description: Зміщення для пагінації
+responses:
+  '200':
+    description: Успішна відповідь із даними контактів
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'

@@ -1,9 +1,9 @@
-//src/controllers/auth.js
+// src/controllers/auth.js
 
 import createError from 'http-errors';
 import bcrypt from 'bcryptjs';
 import { User } from '../db/models/user.js';
-import { createSessionService } from '../services/auth.js';
+import { createSessionService, refreshSessionService, logoutService } from '../services/auth.js';
 
 export const register = async (req, res, next) => {
   try {
@@ -18,9 +18,10 @@ export const register = async (req, res, next) => {
       return next(createError(409, 'Email in use'));
     }
 
-    const newUser = new User({ name, email, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
-    
+
     const { password: _, ...userWithoutPassword } = newUser.toObject();
 
     res.status(201).json({
@@ -29,6 +30,7 @@ export const register = async (req, res, next) => {
       data: userWithoutPassword,
     });
   } catch (error) {
+    console.error(error);
     next(createError(500, 'Error registering user'));
   }
 };
@@ -61,6 +63,7 @@ export const login = async (req, res, next) => {
       data: { accessToken: session.accessToken },
     });
   } catch (error) {
+    console.error(error);
     next(createError(500, 'Error logging in user'));
   }
 };
@@ -81,10 +84,12 @@ export const refreshSession = async (req, res, next) => {
       data: { accessToken: session.accessToken },
     });
   } catch (error) {
+    console.error(error);
     next(createError(500, 'Error refreshing session'));
   }
 };
 
+// Выход пользователя
 export const logout = async (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken;
@@ -97,6 +102,7 @@ export const logout = async (req, res, next) => {
     
     res.status(204).send();
   } catch (error) {
+    console.error(error);
     next(createError(500, 'Error logging out'));
   }
 };
